@@ -1,0 +1,4 @@
+{
+  "id": "fixture-db-migration-gotcha",
+  "transcript": "User: The integration tests failed with 'column users.role does not exist'. Tool: pnpm test returned database schema errors. Assistant: Ran pnpm db:migrate, then pnpm test passed. User: Capture that for next time. Also ignore this synthetic redaction marker: [example-secret-placeholder]."
+}

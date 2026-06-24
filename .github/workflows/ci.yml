@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: typecheck · lint · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      # NOTE: pnpm test mocks all model calls. No provider keys needed here,
+      # so this job runs safely on forked-PR contributions.
+
+  meta-evals:
+    name: meta-evals (the prover)
+    # Meta-evals make real model calls and need provider secrets, so they do NOT
+    # run on untrusted fork PRs. They gate releases, run on a schedule, and can be
+    # triggered manually. Thresholds live in evals/THRESHOLDS.md.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Run meta-evals
+        env:
+          # Provided via repo secrets; never available to fork PRs.
+          RATCHET_VERIFIER_API_KEY: ${{ secrets.RATCHET_VERIFIER_API_KEY }}
+          RATCHET_PROPOSER_API_KEY: ${{ secrets.RATCHET_PROPOSER_API_KEY }}
+        run: pnpm eval
+
+  # Optional but recommended: secret scanning to enforce "no secrets, ever".
+  secret-scan:
+    name: secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2

@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Build outputs and generated artifacts
+dist/
+build/
+out/
+.next/
+target/
+packages/*/dist/
+*.tsbuildinfo
+
+# Coverage, reports, and tool caches
+coverage/
+evals/reports/
+.turbo/
+.parcel-cache/
+.vite/
+.vite-temp/
+
+# Local Ratchet runtime state and demo vaults
+tmp/
+.ratchet/
+vault/
+
+# Logs and temp files
+*.log
+logs/
+*.tmp
+*.swp
+*.swo
+~*
+
+# OS and editor state
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.history/
+
+# Language-local dependency folders
+.venv/
+venv/
+.m2/
+.gradle/

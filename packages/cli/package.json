@@ -1,0 +1,33 @@
+{
+  "name": "@ratchet/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "ratchet": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ratchet/core": "workspace:*",
+    "commander": "^15.0.0",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
