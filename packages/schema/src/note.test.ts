@@ -27,10 +27,10 @@ describe("NoteSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects detected secrets in note content", () => {
+  it("rejects detected sensitive content in note content", () => {
     const result = NoteSchema.safeParse({
       ...validNote,
-      body: "The API key is sk-123456789012345678901234567890",
+      body: "The note should not persist person@example.com.",
     });
 
     expect(result.success).toBe(false);

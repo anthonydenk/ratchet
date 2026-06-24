@@ -50,12 +50,12 @@ describe("distill", () => {
 
   it("redacts the transcript before sending it to the provider", async () => {
     let capturedRequest: CompletionRequest | undefined;
-    const fakeKey = ["sk", "123456789012345678901234567890"].join("-");
+    const privateContact = "person@example.com";
 
     await distill(
       {
         sourceSessionId: "session-002",
-        transcript: `The failure was caused by an accidentally pasted key: ${fakeKey}.`,
+        transcript: `The failure included a private support contact: ${privateContact}.`,
       },
       {
         provider: createMockProvider(
@@ -74,7 +74,7 @@ describe("distill", () => {
     );
 
     expect(capturedRequest?.input).toContain("[redacted]");
-    expect(capturedRequest?.input).not.toContain(fakeKey);
+    expect(capturedRequest?.input).not.toContain(privateContact);
   });
 
   it("redacts sensitive content returned by the provider before Note validation", async () => {

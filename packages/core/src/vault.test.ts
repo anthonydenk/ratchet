@@ -73,8 +73,7 @@ describe("writeNoteToVault", () => {
       expect(markdown).toContain("<!-- ratchet:begin id=01K0RATCHETNOTE000000000001 -->");
       expect(markdown).toContain("## Run database migrations before tests");
       expect(markdown).toContain("<!-- ratchet:end id=01K0RATCHETNOTE000000000001 -->");
-      expect(markdown).not.toContain("sk-live-FAKE000000000000000000000000");
-      expect(markdown).not.toContain("api_key=");
+      expect(markdown).not.toContain("person@example.com");
     } finally {
       await rm(vaultRoot, { force: true, recursive: true });
     }
