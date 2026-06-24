@@ -10,8 +10,8 @@
 
 - **Language:** TypeScript (strict). **Runtime:** Node ≥ 20.
 - **Packages:** pnpm workspaces (monorepo).
-- **Surfaces:** a CLI (`ratchet`) and an MCP server. Distributed via `npx`.
-- **Core packages:** `@ratchet/core` (pipeline), `@ratchet/cli`, `@ratchet/mcp`, `@ratchet/schema` (Zod schemas — the source of truth).
+- **Surfaces:** a CLI (`ratchet`). Distributed via `npx`.
+- **Core packages:** `@ratchet/core` (pipeline), `@ratchet/cli`, `@ratchet/schema` (Zod schemas — the source of truth).
 
 ## ⛔ Non-negotiable invariants (read first)
 
@@ -46,7 +46,7 @@ pnpm lint                    # Biome check
 pnpm format                  # Biome write
 ```
 
-- **Mock all model calls in unit tests.** Live-model calls belong only in `*.eval.ts` under `pnpm eval`, never in `pnpm test`.
+- **Mock all model calls in unit tests.** Live-model calls belong only in explicit live eval paths (`*.live.eval.ts` / `pnpm eval:live`), never in `pnpm test`.
 - **Definition of done for any learning feature:** a passing **meta-eval**. Code that touches distillation, proof, regression, or promotion is **not done** until `pnpm eval` shows the prover's false-promote / false-reject rates stay within the thresholds in `evals/THRESHOLDS.md`. This is the single most important rule for this product — see `docs/testing/meta-evals.md`.
 
 ## Code style
@@ -66,9 +66,7 @@ packages/
   schema/     # Zod source-of-truth: Skill, Note, ProofRun, Ledger (+ migrations)
   core/       # pipeline: capture → distill → prove → promote → ledger; provider-agnostic
   cli/        # `ratchet` commands (commander): init, watch, ledger, verify, doctor
-  mcp/        # MCP server exposing capture/ledger tools to host agents
-  providers/  # model/agent adapters (provider-agnostic interface)
-docs/          # the document suite (product, architecture, testing, security, gtm)
+docs/          # minimal public docs: architecture, proof gate, schema, meta-evals, demo
 evals/         # meta-eval datasets + thresholds for testing the prover
 ```
 
@@ -79,7 +77,7 @@ evals/         # meta-eval datasets + thresholds for testing the prover
 ## Security considerations
 
 - Never commit secrets. `.env` is gitignored; provide `.env.example`.
-- Treat **every captured conversation as untrusted input** — it is a memory-poisoning / prompt-injection vector (OWASP Agentic). Distillation must sanitize; the proof gate is a defense, not a formality. See `docs/security/threat-model.md`.
+- Treat **every captured conversation as untrusted input** — it is a memory-poisoning / prompt-injection vector (OWASP Agentic). Distillation must sanitize; the proof gate is a defense, not a formality.
 - For v3 (shared skills): a skill from outside this machine is untrusted until its proof + provenance are verified. Never auto-promote imported skills.
 - Files an agent must **never** read or commit: `.env`, anything in `secrets/`, the user's real vault outside fixtures.
 

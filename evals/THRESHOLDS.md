@@ -1,129 +1,60 @@
-# Ratchet — Meta-Eval Thresholds (the bar to ship the prover)
+# Ratchet Meta-Eval Thresholds
 
-**Status:** Draft v0.1 · The single source of truth for the numbers `pnpm eval` enforces.
-Referenced by `../AGENTS.md` (§Test commands), `../docs/product/definition-of-done.md` (§3), and
-`../docs/testing/meta-evals.md`.
+This file is the human-readable mirror of `evals/thresholds.ts`. `pnpm eval` enforces these numbers against the labeled meta-eval corpus.
 
-> These are the concrete gates a learning feature must clear before it is **done** and before a
-> release can ship. They describe how well the **proof gate itself** must classify candidate skills,
-> measured over the labeled meta-eval corpus (`../docs/testing/meta-evals.md`). If `pnpm eval` reports
-> any metric outside its bound, it **exits non-zero** and the learning-path PR / release is **blocked**
-> (fail-closed, like the gate it tests). Numbers here are a **machine-readable contract**; the runtime
-> mirror is `evals/thresholds.ts`, and the two must agree (a test asserts it).
-
----
-
-## 1. The gating thresholds (v0.1)
+## Gating Thresholds
 
 | Key | Value | Meaning | Gate |
-|---|---|---|---|
-| `maxFalsePromoteRate` | **0.02** | ≤ 2% of **bad** candidates may be promoted (measured on the holdout slice) | **HARD** — release-blocking |
-| `maxFalseRejectRate` | **0.20** | ≤ 20% of **good** candidates may be rejected | **HARD** — release-blocking |
-| `minCases` | **60** | minimum labeled cases scored (≈ balanced good/bad) before a result is shippable | **HARD** |
-| `minTrialsPerCase` | **5** | trials per case; must be ≥ `proof.minTrials` (proof-gate §3) | **HARD** |
-| `fprConfidence` | **0.95** | we gate on the **upper 95% CI bound** of FPR, not the point estimate | **HARD** |
-| `minProvideDiversityGap` | **> 0** | FPR with provider diversity must be strictly lower than without (independence is load-bearing — meta-evals §4) | **HARD** |
+|---|---:|---|---|
+| `maxFalsePromoteRate` | `0.02` | At most 2% of bad candidates may be promoted, measured on the holdout slice. | Hard |
+| `maxFalseRejectRate` | `0.20` | At most 20% of good candidates may be rejected. | Hard |
+| `minCases` | `60` | Minimum labeled cases scored before a result is shippable. | Hard |
+| `minTrialsPerCase` | `5` | Minimum trials per case; must be at least the proof gate's trial floor. | Hard |
+| `fprConfidence` | `0.95` | Gate on the upper 95% confidence bound for false-promote rate. | Hard |
+| `minProviderDiversityGap` | `0` | False-promote rate with provider diversity must be lower than the colluding/same-family run. | Hard |
 
-Plus these **non-rate hard gates** (any one failing fails the whole run, regardless of FPR/FRR):
+Non-rate hard gates:
 
-- **Evaluator independence:** every emitted ProofRun has
-  `verifierConfigHash !== proposerConfigHash` (AGENTS.md invariant 2; skill-schema §8.1).
-- **Regression fail-closed:** no candidate is promoted when the regression suite could not run
-  (proof-gate §6; meta-evals §5).
-- **No imported auto-promote:** no `quarantined`/imported skill is promoted without a local
-  re-verification ProofRun (skill-schema §8.5).
-- **Manifest completeness:** every result carries a full determinism receipt
-  (AGENTS.md invariant 7; non-determinism §7).
+- every ProofRun has `verifierConfigHash !== proposerConfigHash`;
+- no candidate promotes when regression cannot run;
+- no imported or quarantined skill promotes without local re-verification;
+- every result carries a complete ProofRun manifest.
 
----
+## Why These Numbers
 
-## 2. Rationale (why these numbers, and why asymmetric)
+False promotion is the dangerous error: a bad promoted skill can degrade every future session. False rejection is lost learning, which is less dangerous and can be retried later. That is why the false-promote ceiling is much tighter than the false-reject ceiling.
 
-**Why FPR ≪ FRR.** A false-**promote** is the catastrophic error: a bad skill, once promoted, is
-injected into *every future session* and silently degrades the agent — the exact failure the product
-exists to prevent. A false-**reject** is merely lost learning: the candidate stays a `candidate`/draft
-and can be re-proposed later. Consistent with the gate's fail-closed stance (proof-gate §6), we hold
-FPR an order of magnitude tighter than FRR. **2% vs 20% is deliberate, not a typo.**
+The false-promote gate uses the upper 95% confidence bound, not only the point estimate, so a small or lucky sample cannot ship a leaky prover. The case and trial floors keep the measurement powered enough to mean something.
 
-**Why gate on the CI bound, not the point estimate.** With ~60–100 cases, an observed FPR of 0 could
-still hide a true rate above the ceiling. Gating on the **upper 95% bound** means a small, lucky
-sample can't ship a leaky gate — the same logic by which the gate refuses to promote on one good run
-(proof-gate §3; non-determinism §5).
+Provider diversity is measured because evaluator independence is load-bearing. If removing independence does not worsen false-promote behavior, the verifier is not doing useful independent work.
 
-**Why `minCases` / `minTrialsPerCase` floors.** A great-looking rate over 8 cases is noise. We refuse
-to ship on an under-powered measurement; the floors make the rate statistically meaningful and keep
-`minTrialsPerCase` aligned with the gate's own `minTrials`.
+## Runtime Mirror
 
-**Why the provider-diversity gap gate.** If FPR is identical with and without verifier diversity, the
-"2 effective votes" defense (proof-gate §2) isn't actually doing work — independence has silently
-regressed. Requiring a strictly positive gap turns that defense into a *measured* property, not an
-assumed one.
-
----
-
-## 3. Machine-readable mirror
-
-`evals/thresholds.ts` is imported by the eval harness; it must equal the table above (asserted in a
-test so the doc and the code can't drift):
+`evals/thresholds.ts` must match this table:
 
 ```ts
-// evals/thresholds.ts
 export const THRESHOLDS = {
-  maxFalsePromoteRate: 0.02,   // ≤ 2% bad promoted  (HARD)
-  maxFalseRejectRate:  0.20,   // ≤ 20% good rejected (HARD)
-  minCases:            60,     // min labeled cases scored
-  minTrialsPerCase:    5,      // ≥ proof.minTrials
-  fprConfidence:       0.95,   // gate on upper CI bound of FPR
-  minProviderDiversityGap: 0,  // FPR(diverse) must be < FPR(colluding)
+  maxFalsePromoteRate: 0.02,
+  maxFalseRejectRate: 0.20,
+  minCases: 60,
+  minTrialsPerCase: 5,
+  fprConfidence: 0.95,
+  minProviderDiversityGap: 0,
 } as const;
 ```
 
-A `pnpm eval` run computes `falsePromoteRate`, `fprUpperCI95`, `falseRejectRate`, `cases`, `trials`,
-and the diversity gap, then checks each against the above. Example gating assertion in
-`../docs/testing/meta-evals.md` §8.
+## Passing Receipt
 
----
+`pnpm eval` should report the case count, trial floor, false-promote rate, false-promote CI95 upper bound, false-reject rate, provider-diversity gap, independence violations, regression fail-closed leaks, and final verdict.
 
-## 4. What "pass" looks like (a release receipt)
+A single hard-gate failure exits non-zero and blocks the learning-path change.
 
-```
-$ pnpm eval
-meta-eval (holdout) · corpus v0.1 (split 9f3a…) · gate config a1b2…
-  cases scored ............ 72            (≥ 60)      ✓
-  trials/case ............. 5             (≥ 5)       ✓
-  false-promote rate ...... 0.000  (CI95 ≤ 0.018)    ✓   (≤ 0.02)
-  false-reject rate ....... 0.139                    ✓   (≤ 0.20)
-  diversity FPR gap ....... +0.06                    ✓   (> 0)
-  independence violations . 0                        ✓
-  regression fail-closed .. 0 leaks                  ✓
-PASS — within evals/THRESHOLDS.md
-```
+## Changing Thresholds
 
-A single ✗ anywhere ⇒ non-zero exit ⇒ the learning-path PR / release is blocked
-(definition-of-done §3, §6).
+These ceilings should ratchet down as the corpus grows. Loosening a threshold is a deliberate trust regression and must be called out explicitly in the PR, with the reason documented in `CHANGELOG.md`.
 
----
+## Related Docs
 
-## 5. Tighten over time (ratchet the bar down, never up)
-
-These are **ceilings that only ratchet down** — the same forward-only philosophy as the product
-itself. As the corpus grows and the gate improves, lower `maxFalsePromoteRate` **first** (e.g.
-0.02 → 0.01 → 0.005). Loosening **any** threshold is a deliberate trust regression and requires an
-ADR (`../docs/architecture/adr/`) stating why, plus explicit sign-off — because relaxing the prover's
-bar is relaxing the only promise Ratchet makes. Changes to this file are reviewed as carefully as a
-schema change.
-
-Planned trajectory (illustrative, not binding):
-
-| Milestone | `maxFalsePromoteRate` | `maxFalseRejectRate` | `minCases` |
-|---|---|---|---|
-| v0.1 (now) | 0.02 | 0.20 | 60 |
-| v0.2 | 0.01 | 0.15 | 120 |
-| v1.0 | 0.005 | 0.10 | 250 |
-
----
-
-## 6. Related docs
-`../docs/testing/meta-evals.md` · `../docs/testing/test-strategy.md` · `../docs/testing/fixtures.md` ·
-`../docs/testing/non-determinism.md` · `../docs/architecture/proof-gate.md` ·
-`../docs/product/definition-of-done.md` · `../AGENTS.md`
+- [docs/testing/meta-evals.md](../docs/testing/meta-evals.md)
+- [docs/architecture/proof-gate.md](../docs/architecture/proof-gate.md)
+- [AGENTS.md](../AGENTS.md)

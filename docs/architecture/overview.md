@@ -42,13 +42,10 @@ Ratchet is a pipeline: **capture → distill → prove → promote → ledger**,
 packages/
   schema/     # Zod source-of-truth: Skill, Note, ProofRun, Ledger (+ migrations)
   core/       # pipeline orchestration; pure where possible; no direct I/O in logic
-  providers/  # model + host-agent adapters behind a stable interface
-  cli/        # `ratchet` (commander): init, watch, ledger, verify, doctor, export
-  mcp/        # MCP server exposing capture/ledger tools to host agents
-apps/
-  (later) web # optional local dashboard
+  cli/        # `ratchet` (commander): init, watch, ledger, verify, doctor, demo
 evals/        # meta-eval datasets + THRESHOLDS.md (testing the prover)
-docs/         # this suite
+docs/         # minimal public architecture, testing, and demo docs
+assets/       # brand assets used by README and launch materials
 ```
 
 ## 4. Key interfaces (sketch)
@@ -92,4 +89,4 @@ Adapters isolate all I/O and model calls. `@ratchet/core` logic stays pure and t
 5. `ledger` updates the curve; next session, `context provider` injects promoted skills.
 
 ## 8. Related docs
-`skill-schema.md` · `proof-gate.md` · `cli-mcp-interface.md` · `config-schema.md` · `adr/` · `../security/threat-model.md`
+`skill-schema.md` · `proof-gate.md` · `../testing/meta-evals.md`

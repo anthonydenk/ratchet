@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 - Session capture adapter for the first supported host agent.
 - Distillation: sessions → clean, human-readable Notes in a user-owned markdown vault.
 - `@ratchet/schema` definitions for Note and Skill (Zod, source of truth).
-- MCP server exposing capture/ledger tools to host agents.
 - `@ratchet/schema` definitions for full ProofRun receipts and LedgerEntry records
   (`schemaVersion` 0.2.0) with a 0.1.0 → 0.2.0 migration stub.
 - Proof-gate evaluator enforcing held-out task resolution, minimum trials, significance,
@@ -34,6 +33,10 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
   model calls.
 - `ratchet ledger` earned-skill view with proof delta, verdict, confidence, and curve output.
 - `ratchet ledger --card` SVG/Markdown level-up card rendering from ledger + ProofRun receipts.
+
+### Changed
+- Pruned the public documentation set to the minimum needed for developers to build, test,
+  understand the proof gate, and run the demo.
 
 ---
 

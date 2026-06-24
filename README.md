@@ -15,7 +15,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-black.svg?style=flat-square" /></a>
   <a href="#status"><img alt="Status" src="https://img.shields.io/badge/status-early-orange?style=flat-square" /></a>
-  <a href="docs/product/definition-of-done.md"><img alt="Definition of Done" src="https://img.shields.io/badge/proof--gated-yes-17191E?style=flat-square" /></a>
+  <a href="docs/architecture/proof-gate.md"><img alt="Proof gated" src="https://img.shields.io/badge/proof--gated-yes-17191E?style=flat-square" /></a>
 </p>
 
 ---
@@ -110,7 +110,7 @@ packages/
   core/        Capture/distill/prove/promote/ledger pipeline
   cli/         ratchet command-line interface
 
-docs/          Product, architecture, testing, security, and GTM docs
+docs/          Minimal public architecture, testing, and demo docs
 evals/         Meta-eval corpus and thresholds for testing the prover itself
 assets/        Brand assets used by README and launch materials
 ```
@@ -127,16 +127,14 @@ See [AGENTS.md](AGENTS.md) for the full project-level rules used by coding agent
 
 ## Status
 
-Ratchet is early and moving quickly. The core proof gate, deterministic meta-evals, offline demo loop, ledger, and level-up card are in place. CLI/MCP ergonomics and provider integrations are still evolving.
+Ratchet is early and moving quickly. The core proof gate, deterministic meta-evals, offline demo loop, ledger, and level-up card are in place. CLI ergonomics and provider integrations are still evolving.
 
 ## Documentation
 
 - [Architecture overview](docs/architecture/overview.md)
 - [Proof gate](docs/architecture/proof-gate.md)
 - [Skill schema](docs/architecture/skill-schema.md)
-- [CLI and MCP interface](docs/architecture/cli-mcp-interface.md)
 - [Meta-evals](docs/testing/meta-evals.md)
-- [Definition of done](docs/product/definition-of-done.md)
 
 ## Contributing
 

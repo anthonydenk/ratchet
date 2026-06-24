@@ -94,8 +94,8 @@ Promotion happens **only** on `PASS`, **only** through `@ratchet/core/promotion`
 | Correlated judges ("2 effective votes") | Provider diversity + adversarial verifier |
 | Teaching-to-the-test | Leakage guard + adjacency check |
 | Cost blow-up / runaway loops | Budgets + tiered escalation |
-| Memory poisoning | Untrusted-input sanitization + gate as defense (`security/threat-model.md`) |
+| Memory poisoning | Untrusted-input sanitization + gate as defense |
 
 ## 10. How we test the gate itself
 
-See `docs/testing/meta-evals.md`: a labeled set of known-good and known-bad candidate skills; the gate must promote the good and reject the bad within target false-promote/false-reject rates. **A learning feature is not "done" until this passes** (`definition-of-done.md` §3).
+See `docs/testing/meta-evals.md`: a labeled set of known-good and known-bad candidate skills; the gate must promote the good and reject the bad within target false-promote/false-reject rates. **A learning feature is not done until this passes.**
